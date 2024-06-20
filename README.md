@@ -16,7 +16,7 @@ _[CVPR '22 Oral](https://openaccess.thecvf.com/content/CVPR2022/html/Rombach_Hig
 
 Stable Diffusion is a latent text-to-image diffusion model.
 
-This code was largely inspired by the concept of [Cold-Diffusion](https://arxiv.org/abs/2208.09392) which was implemented here : [Cold Diffusion Models](https://github.com/arpitbansal297/Cold-Diffusion-Models). It was adapted to colorizing images, as described in the paper [Diffusin Colors](https://arxiv.org/pdf/2312.04145), released in December 2023. I added control with color hints, and the objective is to add a temporal version.
+This code was largely inspired by the concept of [Cold-Diffusion](https://arxiv.org/abs/2208.09392) which was implemented here : [Cold Diffusion Models](https://github.com/arpitbansal297/Cold-Diffusion-Models). It was adapted to colorizing images, as described in the paper [Diffusing Colors](https://arxiv.org/pdf/2312.04145), released in December 2023. We added control with color hints, and the objective is to add a temporal version.
 
 
 ________________________________
@@ -43,7 +43,7 @@ By default, this uses the [DDIM sampler](https://arxiv.org/abs/2010.02502), and 
 
 #### Training
 
-Download the weights for [_SD2.1-v_](https://huggingface.co/stabilityai/stable-diffusion-2-1).
+Download the weights for [_SD2.1-v_](https://huggingface.co/stabilityai/stable-diffusion-2-1) or you can intialize them to random. We trained on [COCO](#) dataset, removing all black and white and very desaturated images, resulting in around 114,000 images of resolution 512x512. We trained for 6 epochs with one RTX4090 GPU. Training took 3 days.
 
 
 ## Shout-Outs
