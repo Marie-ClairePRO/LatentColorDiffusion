@@ -3,8 +3,7 @@
 This repository contains [Latent Color Diffusion](https://github.com/Marie-ClairePRO/LatentColorDiffusion), a model for colorizing grayscale images with or without color hints. It diffuses the colors in the latent space, inspired by the paper [Diffusing Colors: Image Colorization with Text Guided Diffusion]() by Zabari et al..
 It trains the UNet model of [stablediffusion2.1](https://huggingface.co/stabilityai/stable-diffusion-2-1) at 512x512 resolution, initialized on [Stable Diffusion weights](https://huggingface.co/stabilityai/stable-diffusion-2-1), and freezes the AutoEncoder + CLIP.
 
-![alt text](https://github.com/Marie-ClairePRO/LatentColorDiffusion/blob/main/assets/woman_color_3_gray_input_0.png)
-![alt text](https://github.com/Marie-ClairePRO/LatentColorDiffusion/blob/main/assets/woman_color_3_samples_0.png)
+![alt text](https://github.com/Marie-ClairePRO/LatentColorDiffusion/blob/main/assets/asset.png)
  
 
 ________________
