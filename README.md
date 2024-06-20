@@ -44,22 +44,22 @@ The weights are not available yet.
 
 By default, this uses the [DDIM sampler](https://arxiv.org/abs/2010.02502), and renders images of size 512x512 (which it was trained on) in 50 steps. The images can be resized to original with parameters.
 The code for inference is in *colorize/colorize.py*, and you can change parameters in the code.
-Put your images in a sample_data folder. Prompts can be given for inference but have shown unuseful, even deteriorating the results. We chose the cfg_scale to be 1. and give no prompt.
-Inference parameters :
-*ddim_steps : set to 50, 30 can sometimes show good results.
-sample : True by default, start the basic inference.
-inpaint / outpaint : start inference with mask to inpaint or outpaint.
-mask : mask is in format 64x64 (latent space), 1 for unchanged zone and 0 for in/outpaint.
-progressive_sampling : save intermediate steps of prediction.
-reshape_to_initial : inference is on 512x512 square images, you want to reshape them afterwards back to original.
-apply_color_to_sample : mix original input luminance to sampled output colors (VAE modify image details).
-write_inputs : to save the input (color and grayscale if given color etc).
-color_scale : only natural desaturation post sampling to give better looking results.
-starting_desat : in ]0,1] for initial level of desaturation (1 for grayscale). *
+Put your images in a sample_data folder. Prompts can be given for inference but have shown unuseful, even deteriorating the results. We chose the cfg_scale to be 1. and give no prompt.<br/>
+Inference parameters :<br/>
+*ddim_steps : set to 50, 30 can sometimes show good results. <br/>
+sample : True by default, start the basic inference.<br/>
+inpaint / outpaint : start inference with mask to inpaint or outpaint.<br/>
+mask : mask is in format 64x64 (latent space), 1 for unchanged zone and 0 for in/outpaint.<br/>
+progressive_sampling : save intermediate steps of prediction.<br/>
+reshape_to_initial : inference is on 512x512 square images, you want to reshape them afterwards back to original.<br/>
+apply_color_to_sample : mix original input luminance to sampled output colors (VAE modify image details).<br/>
+write_inputs : to save the input (color and grayscale if given color etc).<br/>
+color_scale : only natural desaturation post sampling to give better looking results.<br/>
+starting_desat : in ]0,1] for initial level of desaturation (1 for grayscale).*<br/>
 
 Dataset parameters:
-*path_to_im : might be image or directory to video frames (png or jpg).
-outdir : by default is outputs.
+*path_to_im : might be image or directory to video frames (png or jpg).<br/>
+outdir : by default is outputs.<br/>
 isSource : whether image is source or you want to convert it grayscale.*
 
 
