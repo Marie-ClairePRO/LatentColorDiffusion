@@ -1,0 +1,19 @@
+albumentations
+opencv-python
+pudb
+imageio
+imageio-ffmpeg
+pytorch-lightning
+torchmetrics
+omegaconf
+test-tube
+streamlit
+einops
+transformers
+webdataset
+open-clip-torch
+gradio
+kornia
+invisible-watermark
+streamlit-drawable-canvas
+-e .

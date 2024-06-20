@@ -1,0 +1,29 @@
+name: diff
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - python=3.8.5
+  - pip
+  - cudatoolkit
+  - pytorch=2.2.2
+  - torchvision=0.17.2
+  - numpy
+  - pip:
+    - albumentations
+    - opencv-python
+    - imageio
+    - imageio-ffmpeg
+    - pytorch-lightning
+    - omegaconf
+    - test-tube
+    - streamlit
+    - einops
+    - transformers
+    - webdataset
+    - kornia
+    - open_clip_torch
+    - invisible-watermark
+    - streamlit-drawable-canvas
+    - torchmetrics
+    - -e .
