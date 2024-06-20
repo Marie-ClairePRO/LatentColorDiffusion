@@ -1,6 +1,6 @@
 # Latent Color Diffusion 
 
-This repository contains [Latent Color Diffusion](https://github.com/Marie-ClairePRO/LatentColorDiffusion), a model for colorizing grayscale images with or without color hints. It diffuses the colors in the latent space, inspired by the paper [Diffusing Colors: Image Colorization with Text Guided Diffusion]() by Zabari et al..
+This repository contains [Latent Color Diffusion](https://github.com/Marie-ClairePRO/LatentColorDiffusion), a model for colorizing grayscale images with or without color hints, and enhancing colors of desaturated images. It diffuses the colors in the latent space instead of adding noise, and tries to recreate the color step by step. The idea is inspired by [Cold-Diffusion](https://github.com/arpitbansal297/Cold-Diffusion-Models) that diffuses many types of image deterioration in pixel space. The paper released in march 2024 : [Diffusing Colors: Image Colorization with Text Guided Diffusion]() by Zabari et al. proposed to adapt this method within Stable Diffusion. It was made possible by the pseudo linearity of their VAE latent space. This repository aims to provide a code for this paper that did not provide an implementation, and propose a way to control the colors given by the (deterministic) model.
 It trains the UNet model of [stablediffusion2.1](https://huggingface.co/stabilityai/stable-diffusion-2-1) at 512x512 resolution, initialized on [Stable Diffusion weights](https://huggingface.co/stabilityai/stable-diffusion-2-1), and freezes the AutoEncoder + CLIP.
 
 ![alt text](https://github.com/Marie-ClairePRO/LatentColorDiffusion/blob/main/assets/asset.png)
@@ -43,7 +43,7 @@ We suggest to refer to the [Stable Diffusion GitHub page](https://github.com/Sta
 The weights are not available yet.
 
 
-### Inference
+## Inference
 
 By default, this uses the [DDIM sampler](https://arxiv.org/abs/2010.02502), and renders images of size 512x512 (which it was trained on) in 50 steps. The images can be resized to original with parameters.<br/>
 The code for inference is in *colorize/colorize.py*, and you can change parameters in the code.<br/>
@@ -71,7 +71,7 @@ Put your images in a sample_data folder. Prompts can be given for inference but 
 * isSource : whether image is source or you want to convert it grayscale.
 
 
-#### Training
+## Training
 
 Download the weights for [_SD2.1-v_](https://huggingface.co/stabilityai/stable-diffusion-2-1) or you can intialize them randomly. We trained on [COCO](#) dataset, removing all black and white and very desaturated images, resulting in around 114,000 images of resolution 512x512. We trained for 6 epochs with one RTX4090 GPU. Training took 3 days.
 
