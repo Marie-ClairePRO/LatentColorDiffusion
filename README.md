@@ -47,8 +47,10 @@ The weights are not available yet.
 
 By default, this uses the [DDIM sampler](https://arxiv.org/abs/2010.02502), and renders images of size 512x512 (which it was trained on) in 50 steps. The images can be resized to original with parameters.<br/>
 The code for inference is in *colorize/colorize.py*, and you can change parameters in the code.<br/>
-Put your images in a sample_data folder. Prompts can be given for inference but have shown unuseful, even deteriorating the results. We chose the cfg_scale to be 1. and give no prompt.<br/>
-**Inference parameters :**<br/>
+Put your images in a sample_data folder. Prompts can be given for inference but have shown unuseful, even deteriorating the results. We chose the cfg_scale to be 1. and give no prompt.
+
+
+**Sampling parameters :**<br/>
 
 * ddim_steps : set to 50, 30 can sometimes show good results. <br/>
 * sample : True by default, start the basic inference.<br/>
@@ -72,7 +74,10 @@ Put your images in a sample_data folder. Prompts can be given for inference but 
 #### Training
 
 Download the weights for [_SD2.1-v_](https://huggingface.co/stabilityai/stable-diffusion-2-1) or you can intialize them randomly. We trained on [COCO](#) dataset, removing all black and white and very desaturated images, resulting in around 114,000 images of resolution 512x512. We trained for 6 epochs with one RTX4090 GPU. Training took 3 days.
-COCO dataset has to be put in data/colorization/training/train.
+
+We augmented the data because we are interested in colorizing old photographs and old videos. For augmentation on 30% of COCO training images, we reduced the quality, added noise, added blur, motion blur and reduced contrast.
+
+COCO dataset for training and validation can be put in data/colorization/training/train or val. 
 
 Training code is in train/train_dc.py. 
 As prompts appear to not help the model, we will likely remove them from Dataset models and directly list images from folder without using any json file.

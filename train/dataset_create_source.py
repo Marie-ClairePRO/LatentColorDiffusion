@@ -98,16 +98,16 @@ def create_chrom_or_lum(target, eps):
     return source
 
 
-def deteriorate_image(target, blur=0, desat=1., noise=0, motion_blur=0, compression_factor = 1):
+def deteriorate_image(target, blur=0, contrast=1., noise=0, motion_blur=0, compression_factor = 1):
     # Apply a slight Gaussian blur to simulate the lens imperfections
     if blur != 0:
         target = cv.GaussianBlur(target, (2*blur-1, 2*blur-1), 0)
 
     # Reduce saturation to make it look old
-    if desat != 1.:
-        target = cv.cvtColor(target, cv.COLOR_BGR2HSV)
-        target[..., 1] = target[..., 1] * desat  # Reduce the saturation
-        target = cv.cvtColor(target, cv.COLOR_HSV2BGR)
+    if contrast != 1.:
+        mean = np.ones(target.shape)
+        target = contrast * target + (1 - contrast) * mean
+        target = target.astype(np.uint8)
 
     # Add noise to simulate grain
     if noise!=0:

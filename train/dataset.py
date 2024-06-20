@@ -49,11 +49,11 @@ class TrainingDataset(Dataset):
         #data augmentation : for better sampling of old images
         if random.random() < self.augmentation:
             blur=random.randint(0,2) #max = 2
-            desat = min(1.,random.random() + 0.6) #min = 0.6
+            contrast = min(1.,random.random()*0.5 + 0.7) #min = 0.7, proba 2/5 to unchange
             noise=random.randint(0,15) #max = 15
             motion_blur=random.randint(0,7) #max = 7
             compression_factor = random.randint(1,2) #max = 2
-            target = deteriorate_image(target, blur, desat, noise, motion_blur, compression_factor)
+            target = deteriorate_image(target, blur, contrast, noise, motion_blur, compression_factor)
 
         # create_source return RGB image + mask if asked
         # give color hints for __% of dataset

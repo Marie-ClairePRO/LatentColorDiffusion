@@ -38,7 +38,7 @@ inpaint = False
 #if outpaint
 outpaint = False                        
 #mask for inpaint or outpaint, default : square in the middle
-mask = None                             
+mask = None
 #show grid of 4 intermediate steps
 progressive_sampling = False            
 #ddpm sampling (100 steps)
