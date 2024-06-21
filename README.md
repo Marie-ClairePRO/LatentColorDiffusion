@@ -36,7 +36,7 @@ conda env create -f environment.yml
 pip install -r requirements.txt
 ```
 
-We suggest to refer to the [Stable Diffusion GitHub page](https://github.com/Stability-AI/stablediffusion) for installation issues because we started from here.
+We suggest to refer to the [Stable Diffusion GitHub page](https://github.com/Stability-AI/stablediffusion) for installation issues because we started from here. In particular, you can try to install the module xformers for optimization.
 
 ## The weights
 
@@ -68,7 +68,7 @@ Put your images in a sample_data folder. Prompts can be given for inference but 
 
 * path_to_im : might be image or directory to video frames (png or jpg).<br/>
 * outdir : by default is outputs.<br/>
-* isSource : whether image is source or you want to convert it grayscale.
+* isSource : whether image is source or you want to convert it to grayscale.
 
 
 ## Training

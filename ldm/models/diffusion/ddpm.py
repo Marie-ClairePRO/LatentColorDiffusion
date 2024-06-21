@@ -689,12 +689,6 @@ class LatentDiffusion(DDPM):
         return self.first_stage_model.encode(x)
 
     def shared_step(self, batch, **kwargs):
-        if False:
-            import cv2 as cv
-            towrite_img = batch["jpg"][0].cpu().numpy()
-            towrite_img *= 256
-            cv.imwrite(f"/home/mclsaintdizier/Documents/résultats/img.png",towrite_img)
-
         x, gray, c = self.get_input(batch)
         loss = self(x, c, gray)
         return loss
@@ -730,24 +724,6 @@ class LatentDiffusion(DDPM):
         x_desat = self.desat_sample(x_start=x_start, t=t, gray=gray)
         model_output = self.apply_model(x_desat, t, cond)
         deltat = x_start - x_desat
-        if False:
-                import cv2 as cv
-                def write_decode(img,name):
-                    towrite_img = self.decode_first_stage(img)[0].permute(1,2,0).cpu().numpy()
-                    towrite_img *= 256
-                    cv.imwrite(f"/home/mclsaintdizier/Documents/résultats/{name}.png",towrite_img)
-                def write_step(step):
-                    t_step = (torch.ones(t.shape[0])*step).cuda().long()
-                    write_decode(self.desat_sample(x_start=x_start, t=t_step, gray=gray), f"x_desat_{step}")
-                for step in [0., 10., 50., 150., 300., 500., 800., 900., 950., 999.]:
-                    write_step(step)
-                def write_all():
-                    write_decode(x_desat,f"x_desat_{int(t[0])}")
-                    write_decode(gray,"gray")
-                    write_decode(x_start,"x_start")
-                    write_decode(model_output,"output")
-                write_all()
-
         loss_dict = {}
         prefix = 'train' if self.training else 'val'
 
@@ -935,45 +911,41 @@ class LatentDiffusion(DDPM):
 
     @torch.no_grad()
     def log_images(self, batch, N=8, n_row=4, sample=True, ddim_steps=50, ddim_eta=0., return_keys=None,
-                   quantize_denoised=True, inpaint=False, plot_desat_rows=True, plot_progressive_rows=False,
+                   quantize_denoised=True, inpaint=True, plot_desat_rows=True, plot_progressive_rows=False,
                    plot_diffusion_rows=True, unconditional_guidance_scale=1., unconditional_guidance_label=None,
-                   use_ema_scope=True, outpaint = False, mask=None, originals = True,
+                   use_ema_scope=True,
                    **kwargs):
         ema_scope = self.ema_scope if use_ema_scope else nullcontext
         use_ddim = ddim_steps is not None
 
         log = dict()
-        z, gray, c, x, xrec, xc, gray_input = self.get_input(batch,
-                                                        return_first_stage_outputs=True,
-                                                        force_c_encode=True,
-                                                        return_original_cond=True,
-                                                        return_original_gray=True,
-                                                        bs=N)
+        z, gray, c, x, xrec, xc = self.get_input(batch,
+                                                return_first_stage_outputs=True,
+                                                force_c_encode=True,
+                                                return_original_cond=True,
+                                                bs=N)
         N = min(x.shape[0], N)
         n_row = min(x.shape[0], n_row)
-        if originals:
-            log["inputs"] = x
-            log["reconstruction"] = xrec
-            log["gray_input"] = gray_input
-            #log["gray"] = batch[self.gray_key]
-            if self.model.conditioning_key is not None:
-                if hasattr(self.cond_stage_model, "decode"):
-                    xc = self.cond_stage_model.decode(c)
-                    log["conditioning"] = xc
-                elif self.cond_stage_key in ["caption", "txt"]:
-                    xc = log_txt_as_img((x.shape[2], x.shape[3]), batch[self.cond_stage_key], size=x.shape[2] // 25)
-                    log["conditioning"] = xc
-                elif self.cond_stage_key in ['class_label', "cls"]:
-                    try:
-                        xc = log_txt_as_img((x.shape[2], x.shape[3]), batch["human_label"], size=x.shape[2] // 25)
-                        log['conditioning'] = xc
-                    except KeyError:
-                        # probably no "human_label" in batch
-                        pass
-                elif isimage(xc):
-                    log["conditioning"] = xc
-                if ismap(xc):
-                    log["original_conditioning"] = self.to_rgb(xc)
+        log["inputs"] = x
+        log["reconstruction"] = xrec
+        if self.model.conditioning_key is not None:
+            if hasattr(self.cond_stage_model, "decode"):
+                xc = self.cond_stage_model.decode(c)
+                log["conditioning"] = xc
+            elif self.cond_stage_key in ["caption", "txt"]:
+                xc = log_txt_as_img((x.shape[2], x.shape[3]), batch[self.cond_stage_key], size=x.shape[2] // 25)
+                log["conditioning"] = xc
+            elif self.cond_stage_key in ['class_label', "cls"]:
+                try:
+                    xc = log_txt_as_img((x.shape[2], x.shape[3]), batch["human_label"], size=x.shape[2] // 25)
+                    log['conditioning'] = xc
+                except KeyError:
+                    # probably no "human_label" in batch
+                    pass
+            elif isimage(xc):
+                log["conditioning"] = xc
+            if ismap(xc):
+                log["original_conditioning"] = self.to_rgb(xc)
 
         if plot_diffusion_rows:
             # get diffusion row
@@ -1000,9 +972,7 @@ class LatentDiffusion(DDPM):
             log["samples"] = x_samples
             if plot_desat_rows:
                 pred_x0_grid = self._get_desat_row_from_list(z_gray_intermediate["pred_x0"])
-                x_inter_grid = self._get_desat_row_from_list(z_gray_intermediate["x_inter"])
                 log["pred_x0_grid"] = pred_x0_grid
-                log["x_inter_grid"] = x_inter_grid
 
             if quantize_denoised and not isinstance(self.first_stage_model, AutoencoderKL) and not isinstance(
                     self.first_stage_model, IdentityFirstStage):
@@ -1031,13 +1001,12 @@ class LatentDiffusion(DDPM):
                 log["pred_x0_grid_cfg"] = pred_x0_grid
 
         if inpaint:
-            if mask is None:
-                # make a simple center square
-                b, h, w = z.shape[0], z.shape[2], z.shape[3]
-                mask = torch.ones(N, h, w).to(self.device)
-                # zeros will be filled in
-                mask[:, h // 4:3 * h // 4, w // 4:3 * w // 4] = 0.
-                mask = mask[:, None, ...]
+            # make a simple center square
+            h, w = z.shape[2], z.shape[3]
+            mask = torch.ones(N, h, w).to(self.device)
+            # zeros will be filled in
+            mask[:, h // 4:3 * h // 4, w // 4:3 * w // 4] = 0.
+            mask = mask[:, None, ...]
             with ema_scope("Plotting Inpaint"):
                 samples, _ = self.sample_log(gray=gray, cond=c, batch_size=N, ddim=use_ddim, eta=ddim_eta,
                                              ddim_steps=ddim_steps, x0=z[:N], mask=mask)
@@ -1045,20 +1014,13 @@ class LatentDiffusion(DDPM):
             log["samples_inpainting"] = x_samples
             log["mask"] = mask
 
-        if outpaint:
-            if mask is None:
-                # make a simple center square
-                b, h, w = z.shape[0], z.shape[2], z.shape[3]
-                mask = torch.ones(N, h, w).to(self.device)
-                # zeros will be filled in
-                mask[:, h // 4:3 * h // 4, w // 4:3 * w // 4] = 0.
-                mask = mask[:, None, ...]
             mask = 1. - mask
             with ema_scope("Plotting Outpaint"):
                 samples, _ = self.sample_log(gray=gray, cond=c, batch_size=N, ddim=use_ddim, eta=ddim_eta,
                                              ddim_steps=ddim_steps, x0=z[:N], mask=mask)
             x_samples = self.decode_first_stage(samples.to(self.device))
             log["samples_outpainting"] = x_samples
+
 
         if plot_progressive_rows:   #ddpm method
             with ema_scope("Plotting Progressives"):
@@ -1075,6 +1037,68 @@ class LatentDiffusion(DDPM):
             else:
                 return {key: log[key] for key in return_keys}
         return log
+    
+    @torch.no_grad()
+    def infer_images(self, batch, N=8, n_row=4, ddim_steps=50, ddim_eta=0., return_keys=None,
+                   inpaint=False, plot_desat_rows=True, plot_progressive_rows=False,
+                   use_ema_scope=True, mask=None, originals = True,
+                   **kwargs):
+        ema_scope = self.ema_scope if use_ema_scope else nullcontext
+        use_ddim = ddim_steps is not None
+
+        log = dict()
+        z, gray, c, x, gray_input = self.get_input(batch,
+                                                    force_c_encode=True,
+                                                    return_original_gray=True,
+                                                    bs=N)
+        N = min(x.shape[0], N)
+        n_row = min(x.shape[0], n_row)
+        
+        if originals:
+            log["gray_input"] = gray_input
+
+        with ema_scope("Sampling"):
+            samples, z_gray_intermediate = self.sample_log(gray=gray, cond=c, batch_size=N, ddim=use_ddim,
+                                                         ddim_steps=ddim_steps, eta=ddim_eta, **kwargs)
+        x_samples = self.decode_first_stage(samples)
+        log["samples"] = x_samples
+        if plot_desat_rows:
+            pred_x0_grid = self._get_desat_row_from_list(z_gray_intermediate["pred_x0"])
+            x_inter_grid = self._get_desat_row_from_list(z_gray_intermediate["x_inter"])
+            log["pred_x0_grid"] = pred_x0_grid
+            log["x_inter_grid"] = x_inter_grid
+
+        if inpaint:
+            if mask is None:
+                # make a simple center square
+                h, w = z.shape[2], z.shape[3]
+                mask = torch.ones(N, h, w).to(self.device)
+                # zeros will be filled in
+                mask[:, h // 4:3 * h // 4, w // 4:3 * w // 4] = 0.
+                mask = mask[:, None, ...]
+            with ema_scope("Plotting Inpaint"):
+                samples, _ = self.sample_log(gray=gray, cond=c, batch_size=N, ddim=use_ddim, eta=ddim_eta,
+                                             ddim_steps=ddim_steps, x0=z[:N], mask=mask)
+            x_samples = self.decode_first_stage(samples.to(self.device))
+            log["samples_inpainting"] = x_samples
+            log["mask"] = mask
+
+        if plot_progressive_rows:   #ddpm method
+            with ema_scope("Plotting Progressives"):
+                _, progressives = self.progressive_colorize(c,
+                                                            shape=(self.channels, self.image_size, self.image_size),
+                                                            x_T = gray,
+                                                            batch_size=N)
+            prog_row = self._get_desat_row_from_list(progressives, desc="Progressive Generation")
+            log["progressive_row"] = prog_row
+
+        if return_keys:
+            if np.intersect1d(list(log.keys()), return_keys).shape[0] == 0:
+                return log
+            else:
+                return {key: log[key] for key in return_keys}
+        return log
+
 
     def configure_optimizers(self):
         lr = self.learning_rate

@@ -3,9 +3,9 @@ from share import *
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
 from torch.utils.data import DataLoader
-from train.dataset import TrainingDataset
+from scripts.dataset import TrainingDataset
 from logger import ImageLogger, Logger
-from train.model_load import create_model, load_state_dict
+from scripts.model_load import create_model, load_state_dict
 
 
 # Configs
@@ -21,7 +21,7 @@ learning_rate = 1e-5
 sd_locked = True
 only_mid_control = False
 
-def dataloader(prompts, p=0.1, b=batch_size, shuffle=False, data_root = "data/colorization/training/"):
+def dataloader(prompts, p=0.1, b=batch_size, shuffle=False, data_root = "data"):
     dataset = TrainingDataset(prompts, data_root= data_root, p=p)
     return DataLoader(dataset, num_workers=b, batch_size=b, shuffle=shuffle)
 
@@ -44,7 +44,7 @@ model.only_mid_control = only_mid_control
 train_coco_dataloader = dataloader(prompts_train_coco_path, shuffle=True)
 val_dataloader = dataloader(prompts_val_path)
 test_dataloader = dataloader(prompts_test_path, p=0)
-old_photos_dataloader = dataloader(prompts_train_coco_path, data_root="data/colorization/old_photos_dataset/", p=1)
+old_photos_dataloader = dataloader(prompts_train_coco_path, data_root="data/old_photos_dataset", p=1)
 
 checkpoint_callback = ModelCheckpoint(
     dirpath='lightning_logs/version_5/',
