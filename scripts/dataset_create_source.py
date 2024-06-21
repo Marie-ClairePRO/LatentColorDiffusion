@@ -161,5 +161,5 @@ def tests(path, out="result"):
 
     print("time for 100000 images: ~",(time.time() - debut)*100000 / 60, "minutes")
 
-#tests("/home/mclsaintdizier/point.jpg")
+#tests("point.jpg")
 #test_deterioration()

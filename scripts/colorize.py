@@ -15,7 +15,7 @@ from scripts.dataset_create_source import create_source
 model = create_model('./configs/v2-inference.yaml').cpu()
 
 #path to weights
-weights = "/home/mclsaintdizier/Documents/stablediffusion_utils/lightning_logs/version_20_aug_controlled/epoch=06-loss_epoch=0.00.ckpt"
+weights = ""
 model.load_state_dict(load_state_dict(weights, location='cuda'))
 model = model.cuda().eval()
 ddim_sampler = DDIMSampler(model)
@@ -64,8 +64,8 @@ isSource = False
 
 #image/video and output
 #path_to_im is either image file or folder of image files
-path_to_im = "/home/mclsaintdizier/Documents/test_dataset"
-outdir = "/home/mclsaintdizier/Documents/test_results/latentcolordiff_cs1_hint/"
+path_to_im = ""
+outdir = ""
 
 #create mask by hand
 '''h, w = 64, 64
@@ -75,7 +75,7 @@ mask = mask[:, None, ...]'''
 
 #path and names of outputs
 name_out = path_to_im.split('/')[-1].split('.')[0]
-#os.makedirs(os.path.join(outdir,name_out), exist_ok=True)
+os.makedirs(os.path.join(outdir,name_out), exist_ok=True)
 
 
 #dataloader
@@ -83,7 +83,7 @@ input_dataset = InferenceDataset(data=path_to_im,
                                 prompt=prompt, 
                                 resize=resize,
                                 isSource=isSource,
-                                withControl=True)
+                                withControl=False)
 
 input_dataset = DataLoader(input_dataset)
 
@@ -119,12 +119,7 @@ for batch in input_dataset:
     for k in images:
         if isinstance(images[k], torch.Tensor):
             grid = init_grid(images[k])
-            #filename = f"{name_out}_{k}_{count}.png"
-            #save_path = os.path.join(outdir, name_out, filename)
-            if k == "samples":
-                save_path = os.path.join(outdir, input_filename.split('/')[-1])
-            else:
-                save_path = os.path.join(outdir, f"{k}_" + input_filename.split('/')[-1])
+            save_path = os.path.join(outdir, name_out, f"{k}_{count}" + input_filename.split('/')[-1])
 
             if reshape_to_initial and resize:
                 input_image = cv2.cvtColor(cv2.imread(input_filename),cv2.COLOR_BGR2RGB)

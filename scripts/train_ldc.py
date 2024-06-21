@@ -9,8 +9,7 @@ from scripts.model_load import create_model, load_state_dict
 
 
 # Configs
-#resume_path = 'lightning_logs/version_13/checkpoints/epoch=7-step=3535.ckpt'
-resume_path = "/home/mclsaintdizier/Documents/ColorizeNet-main/weights/base/v2-1_512-ema-pruned.ckpt"
+resume_path = "weights/base/v2-1_512-ema-pruned.ckpt"
 prompts_train_coco_path = 'promptsTrain.json'
 prompts_test_path = 'promptsTest.json'
 prompts_val_path = 'promptsVal.json'

@@ -20,10 +20,10 @@ def read_json_lines(file_path):
 def init_coco():
 	dirType='train'
 	#dirType = "val"
-	dir = f"/home/mclsaintdizier/Documents/coco/annotations/captions_{dirType}2017.json"
-	images_dir = f"/home/mclsaintdizier/Documents/coco/{dirType}2017"
+	dir = f"coco/annotations/captions_{dirType}2017.json"
+	images_dir = f"coco/{dirType}2017"
 
-	promptsDir = "/home/mclsaintdizier/Documents/ColorizeNet-main/data/colorization/training/"
+	promptsDir = "data/colorization/training/"
 	newPrompts = promptsDir + "promptsTrain.json"
 	valid_imgs = os.listdir(images_dir)
 	
@@ -34,7 +34,7 @@ def init_coco():
 	return newPrompts, valid_imgs, imgs_keys, ann
 
 def init_finetune():
-    dir = "/home/mclsaintdizier/Documents/ColorizeNet-main/data/colorization/finetune_dataset/"
+    dir = "data/colorization/finetune_dataset/"
     images_dir = os.path.join(dir,"train")
     newPrompts = os.path.join(dir,"promptsTrain.json")
     valid_imgs = os.listdir(images_dir)
