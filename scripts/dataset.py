@@ -93,7 +93,6 @@ class InferenceDataset(Dataset):
                  withControl=False):
         
         self.resize = resize
-        self.prompt_path = prompt
         self.data_path = data
         self.with_control = withControl 
         self.isSource = isSource
@@ -101,10 +100,12 @@ class InferenceDataset(Dataset):
         if self.isImgDir:
             imgs = os.listdir(self.data_path)
             imgs.sort() #in case is video, to keep frames in good order
+            imgs = np.flip(imgs)
             self.data = [{'data': os.path.join(self.data_path,img) , 'prompt':prompt} for img in imgs
                           if img.endswith(("png","jpg","jpeg","tif","bmp","webp","dib"))]
-        assert os.path.isfile(self.data_path)
-        self.data = [{'data': self.data_path, 'prompt':prompt}]
+        else:
+            assert os.path.isfile(self.data_path)
+            self.data = [{'data': self.data_path, 'prompt':prompt}]
 
     def __len__(self):
         return len(self.data)

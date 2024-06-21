@@ -1041,7 +1041,7 @@ class LatentDiffusion(DDPM):
     @torch.no_grad()
     def infer_images(self, batch, N=8, n_row=4, ddim_steps=50, ddim_eta=0., return_keys=None,
                    inpaint=False, plot_desat_rows=True, plot_progressive_rows=False,
-                   use_ema_scope=True, mask=None, originals = True,
+                   use_ema_scope=True, mask=None, original = True,
                    **kwargs):
         ema_scope = self.ema_scope if use_ema_scope else nullcontext
         use_ddim = ddim_steps is not None
@@ -1049,12 +1049,13 @@ class LatentDiffusion(DDPM):
         log = dict()
         z, gray, c, x, gray_input = self.get_input(batch,
                                                     force_c_encode=True,
+                                                    return_x= True,
                                                     return_original_gray=True,
                                                     bs=N)
         N = min(x.shape[0], N)
         n_row = min(x.shape[0], n_row)
         
-        if originals:
+        if original:
             log["gray_input"] = gray_input
 
         with ema_scope("Sampling"):

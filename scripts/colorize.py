@@ -50,7 +50,7 @@ apply_color_to_sample = True
 write_input = False   
 #scale : output = s * model_output + (1 - s) * grayscale 
 #color_scale = 0.8 in Diffusing Colors
-color_scale = 0.8
+color_scale = 1.0
 #desaturation starting point, between 0 and 1 / 1 is grayscale
 #number of steps if ddim_steps * starting_desat
 starting_desat = 1.     
@@ -60,17 +60,12 @@ starting_desat = 1.
 #resize to 512x512 for inference
 resize = True
 #keep image as source or change it
-isSource = True
+isSource = False
 
 #image/video and output
 #path_to_im is either image file or folder of image files
-path_to_im = "/home/mclsaintdizier/Documents/stablediffusion_utils/sample_data/video_1"
-outdir = "/home/mclsaintdizier/Documents/stablediffusion_utils/outputs/version_20"
-
-#image/video and output
-#path_to_im is either image file or folder of image files
-path_to_im = "sample_data/woman_color_3.png"
-outdir = "outputs/version_20"
+path_to_im = "/home/mclsaintdizier/Documents/test_dataset"
+outdir = "/home/mclsaintdizier/Documents/test_results/latentcolordiff_cs1_hint/"
 
 #create mask by hand
 '''h, w = 64, 64
@@ -80,14 +75,15 @@ mask = mask[:, None, ...]'''
 
 #path and names of outputs
 name_out = path_to_im.split('/')[-1].split('.')[0]
-os.makedirs(os.path.join(outdir,name_out), exist_ok=True)
+#os.makedirs(os.path.join(outdir,name_out), exist_ok=True)
 
 
 #dataloader
-input_dataset = InferenceDataset(data_root=path_to_im, 
+input_dataset = InferenceDataset(data=path_to_im, 
                                 prompt=prompt, 
                                 resize=resize,
-                                isSource=isSource)
+                                isSource=isSource,
+                                withControl=True)
 
 input_dataset = DataLoader(input_dataset)
 
@@ -118,16 +114,20 @@ for batch in input_dataset:
                                     original = write_input,
                                     starting_desat = starting_desat
                                     )
-        
+    input_filename = batch["filename"][0]
     #write results of 1 inference
     for k in images:
         if isinstance(images[k], torch.Tensor):
             grid = init_grid(images[k])
-            filename = f"{name_out}_{k}_{count}.png"
-            save_path = os.path.join(outdir,name_out, filename)
+            #filename = f"{name_out}_{k}_{count}.png"
+            #save_path = os.path.join(outdir, name_out, filename)
+            if k == "samples":
+                save_path = os.path.join(outdir, input_filename.split('/')[-1])
+            else:
+                save_path = os.path.join(outdir, f"{k}_" + input_filename.split('/')[-1])
 
             if reshape_to_initial and resize:
-                input_image = cv2.cvtColor(cv2.imread(batch["filename"][0]),cv2.COLOR_BGR2RGB)
+                input_image = cv2.cvtColor(cv2.imread(input_filename),cv2.COLOR_BGR2RGB)
                 H0, W0, _ = input_image.shape
                 H, W, _ = grid.shape
                 ratio = round(float(W) / float(H)) #for grids
