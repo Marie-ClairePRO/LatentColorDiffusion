@@ -15,7 +15,7 @@ model:
     monitor: val/loss_simple_ema
     scale_factor: 0.18215
     use_ema: False 
-    parameterization: "deltat"
+    parameterization: "delta"
     color_factors_schedule: "linear"
     factor: 0.995
 

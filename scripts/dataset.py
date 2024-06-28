@@ -13,12 +13,9 @@ class TrainingDataset(Dataset):
     def __init__(self, 
                  prompt_path, 
                  data_root = "data/colorization/training/", 
-                 resize=True, 
                  p=0.1, 
                  control_points=0.8,
                  augmentation = 0.5):
-        
-        self.resize = resize
         self.data = []
         self.prompt_path = prompt_path
         self.p = p
@@ -65,32 +62,23 @@ class TrainingDataset(Dataset):
         # convert to RGB -- OpenCV reads images in BGR order
         target = cv2.cvtColor(target, cv2.COLOR_BGR2RGB)
         
-        if self.resize:
-            source = cv2.resize(source, (512, 512), interpolation=cv2.INTER_CUBIC)
-            target = cv2.resize(target, (512, 512), interpolation=cv2.INTER_CUBIC)
-        else:
-            H, W, _ = source.shape
-            k = float(512) / min(float(H), float(W))
-            H = int(np.round(float(H)*k / 64.0)) * 64            # image resized to H and W being multiple of 64
-            W = int(np.round(float(W)*k / 64.0)) * 64
-            source = cv2.resize(source, (W, H), interpolation=cv2.INTER_LANCZOS4 if k > 1 else cv2.INTER_AREA)
-            target = cv2.resize(target, (W, H), interpolation=cv2.INTER_LANCZOS4 if k > 1 else cv2.INTER_AREA)
-            assert np.shape(source) == np.shape(target)
+        source = cv2.resize(source, (512, 512), interpolation=cv2.INTER_CUBIC)
+        target = cv2.resize(target, (512, 512), interpolation=cv2.INTER_CUBIC)
 
         # Normalize images to [-1, 1].
         source = (source.astype(np.float32) / 127.5) - 1.0
         target = (target.astype(np.float32) / 127.5) - 1.0
 
-        return dict(image=target, txt=prompt, source=source, filename=target_filename)
+        return dict(image=target, txt=prompt, source=source)
     
 
 
 class InferenceDataset(Dataset):
     def __init__(self, prompt, 
                  data, 
-                 resize=True, 
+                 resize = True, 
                  isSource = False,
-                 withControl=False):
+                 withControl = False):
         
         self.resize = resize
         self.data_path = data
@@ -100,8 +88,7 @@ class InferenceDataset(Dataset):
         if self.isImgDir:
             imgs = os.listdir(self.data_path)
             imgs.sort() #in case is video, to keep frames in good order
-            imgs = np.flip(imgs)
-            self.data = [{'data': os.path.join(self.data_path,img) , 'prompt':prompt} for img in imgs
+            self.data = [{'data': os.path.join(self.data_path,img) , 'prompt':prompt[img]} for img in imgs
                           if img.endswith(("png","jpg","jpeg","tif","bmp","webp","dib"))]
         else:
             assert os.path.isfile(self.data_path)

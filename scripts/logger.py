@@ -102,7 +102,6 @@ class Logger(Callback):
             trained = {name: param.data for name, param in pl_module.named_parameters()
                     if param.requires_grad == True}
             
-            #weights_avg_grad_magnitudeLab = torch.mean(torch.norm(gradients[layer+"weight"][:,:-1]))
             gradients_m = torch.mean(torch.stack([torch.norm(grad) for grad in gradients.values()]))
             trained_m = torch.mean(torch.stack([torch.norm(t) for t in trained.values()]))
 

@@ -40,7 +40,7 @@ We suggest to refer to the [Stable Diffusion GitHub page](https://github.com/Sta
 
 ## The weights
 
-The weights are not available yet.
+The weights are available [here](https://huggingface.co/Marie-ClairePRO/LatentColorDiffusion/blob/main/latentcolordiffusion.pth)
 
 
 ## Inference

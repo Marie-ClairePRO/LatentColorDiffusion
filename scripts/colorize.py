@@ -15,14 +15,14 @@ from scripts.dataset_create_source import create_source
 model = create_model('./configs/v2-inference.yaml').cpu()
 
 #path to weights
-weights = ""
+weights = "latentcolordiffusion.pth"
 model.load_state_dict(load_state_dict(weights, location='cuda'))
 model = model.cuda().eval()
 ddim_sampler = DDIMSampler(model)
 
 
 #set up
-prompt = ""
+prompt = "A red cat and a blue dog"
 #negative prompt for unconditional guidance
 n_prompt = ""                           
 #number of steps (<=50)
@@ -60,12 +60,12 @@ starting_desat = 1.
 #resize to 512x512 for inference
 resize = True
 #keep image as source or change it
-isSource = False
+isSource = True
 
 #image/video and output
 #path_to_im is either image file or folder of image files
-path_to_im = ""
-outdir = ""
+path_to_im = "/sample_data/example.png"
+outdir = "/outputs"
 
 #create mask by hand
 '''h, w = 64, 64
@@ -76,7 +76,6 @@ mask = mask[:, None, ...]'''
 #path and names of outputs
 name_out = path_to_im.split('/')[-1].split('.')[0]
 os.makedirs(os.path.join(outdir,name_out), exist_ok=True)
-
 
 #dataloader
 input_dataset = InferenceDataset(data=path_to_im, 
@@ -104,9 +103,9 @@ count = 0
 for batch in input_dataset:
     with torch.no_grad():
         images = model.infer_images(batch, 
-                                    #unconditional_guidance_scale = cfg_scale,
+                                    unconditional_guidance_scale = cfg_scale,
                                     ddim_steps=ddim_steps,
-                                    #unconditional_guidance_label = [n_prompt],
+                                    unconditional_guidance_label = [n_prompt],
                                     inpaint = inpaint,
                                     mask = mask,
                                     plot_desat_rows = progressive_sampling,

@@ -174,7 +174,7 @@ class DDIMSampler(object):
 
         if self.model.parameterization == "x0":
             pred_x0 = model_output
-        elif self.model.parameterization == "deltat":
+        elif self.model.parameterization == "delta":
             pred_x0 = model_output + x_t
 
         x_t_prev = x_t + (pred_x0 - x_T) / total_steps

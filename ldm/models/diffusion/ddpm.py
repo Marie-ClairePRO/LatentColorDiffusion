@@ -59,10 +59,9 @@ class DDPM(pl.LightningModule):
                  image_size=256,
                  channels=3,
                  log_every_t=100,
-                 clip_denoised=True,
                  l_simple_weight=1.,
                  conditioning_key=None,
-                 parameterization="deltat",  # all assuming fixed variance schedules
+                 parameterization="delta",  # all assuming fixed variance schedules
                  scheduler_config=None,
                  use_positional_encodings=False,
                  learn_logvar=False,
@@ -75,11 +74,10 @@ class DDPM(pl.LightningModule):
                  factor= 0.9
                  ):
         super().__init__()
-        assert parameterization in ["x0", "deltat"], f'supporting "x0" and "deltat", not {parameterization}'
+        assert parameterization in ["x0", "delta"], f'supporting "x0" and "delta", not {parameterization}'
         self.parameterization = parameterization
         print(f"{self.__class__.__name__}: Running in {self.parameterization}-prediction mode")
         self.cond_stage_model = None
-        self.clip_denoised = clip_denoised
         self.log_every_t = log_every_t
         self.first_stage_key = first_stage_key
         self.gray_key = gray_key
@@ -254,7 +252,7 @@ class DDPM(pl.LightningModule):
         loss_dict = {}
         if self.parameterization == "x0":
             target = x_start
-        elif self.parameterization == "deltat":
+        elif self.parameterization == "delta":
             target = x_start - x_desat
         else:
             raise NotImplementedError(f"Parameterization {self.parameterization} not yet supported")
@@ -423,7 +421,6 @@ class LatentDiffusion(DDPM):
         self.instantiate_first_stage(first_stage_config)
         self.instantiate_cond_stage(cond_stage_config)
         self.cond_stage_forward = cond_stage_forward
-        self.clip_denoised = False
         self.bbox_tokenizer = None
 
         self.restarted_from_ckpt = False
@@ -723,14 +720,14 @@ class LatentDiffusion(DDPM):
         assert gray.shape == x_start.shape
         x_desat = self.desat_sample(x_start=x_start, t=t, gray=gray)
         model_output = self.apply_model(x_desat, t, cond)
-        deltat = x_start - x_desat
+        delta = x_start - x_desat
         loss_dict = {}
         prefix = 'train' if self.training else 'val'
 
         if self.parameterization == "x0":
             target = x_start
-        elif self.parameterization == "deltat":
-            target = deltat
+        elif self.parameterization == "delta":
+            target = delta
         else:
             raise NotImplementedError()
 
@@ -744,14 +741,14 @@ class LatentDiffusion(DDPM):
         return loss, loss_dict
 
     @torch.no_grad()
-    def p_sample(self, x_t, gray, c, t, return_x0=True):
+    def p_sample(self, x_t, gray, c, t):
         b, *_, device = *x_t.shape, x_t.device
 
         model_output = self.apply_model(x_t, t, c)
 
         if self.parameterization == "x0":
             pred_x0 = model_output
-        elif self.parameterization == "deltat":
+        elif self.parameterization == "delta":
             pred_x0 = model_output + x_t
 
         x_t_prev = x_t + (pred_x0 - gray) / self.num_timesteps
@@ -832,9 +829,7 @@ class LatentDiffusion(DDPM):
         for i in iterator:
             ts = torch.full((b,), i, device=device, dtype=torch.long)
 
-            img = self.p_sample(img, cond, ts,
-                                clip_denoised=self.clip_denoised,
-                                quantize_denoised=quantize_denoised)
+            img = self.p_sample(img, cond, ts, quantize_denoised=quantize_denoised)
             if mask is not None:
                 img_orig = self.desat_sample(x0, ts, gray=None)
                 img = img_orig * mask + (1. - mask) * img

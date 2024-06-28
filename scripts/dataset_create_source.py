@@ -12,7 +12,7 @@ BLUE = (128, 255, 0)
 GREEN = (128, 0, 0)'''
 
 def valid_color(variance, square):
-    #we agree a greater variance when we select more points, the color varies more on bigger area
+    #we accept a greater variance when we select more points, the color varies more on bigger area
     #we want less precision but not linear so we take log
     #we found good results with variance of color 140 for 10 points and luminance 1500 for 10 points
     var_color = int(60*np.log(square))
